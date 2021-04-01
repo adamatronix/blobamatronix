@@ -12,7 +12,8 @@ class Blobamatronix {
       this.renderer = null;
       this.renderFrame = this.renderFrame.bind(this);
       this.generateTextureCanvas();
-      //this.setupWorld();
+      this.setupWorld();
+      this.addsphere();
       this.renderFrame();
 
     }
@@ -27,7 +28,7 @@ class Blobamatronix {
 
       //setup the camera
       this.camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.2, 5000);
-      this.camera.position.set(2000, 2000, 2000);
+      this.camera.position.set(10, 10, 10);
       this.camera.lookAt(new THREE.Vector3(0,0,0));
 
       //setup renderer
@@ -42,17 +43,29 @@ class Blobamatronix {
 
        //setup controls
        let controls = new OrbitControls( this.camera, this.renderer.domElement);
-       controls.minDistance = 50;
-       controls.maxDistance = 2000;
+       controls.minDistance = 0;
+       controls.maxDistance = 500;
 
        //add lighting
        const skyColor = 0xB1E1FF;  // light blue
        const groundColor = 0x000000;  // brownish orange
        const intensity = 1;
        const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
-       light.position.set(0,100,0);
+       light.position.set(0,200,0);
        this.scene.add(light);
 
+   }
+
+   addsphere() {
+    const geometry = new THREE.SphereGeometry( 5, 50, 50);
+    const material = new THREE.MeshPhongMaterial({
+      flatShading: false,
+      shininess: 150,
+      displacementMap: this.texture,
+      displacementScale: 5
+    });
+    const sphere = new THREE.Mesh( geometry, material );
+    this.scene.add( sphere );
    }
 
    generateTextureCanvas() {
@@ -65,6 +78,7 @@ class Blobamatronix {
       this.t = 0;
       this.imagedata = this.context.getImageData(0,0,this.canvas.width,this.canvas.height);
       this.data = this.imagedata.data;
+      this.texture = new THREE.CanvasTexture(this.context.canvas);
        
     }
 
@@ -74,7 +88,7 @@ class Blobamatronix {
 
       for(let x=0; x<canvas.width; x++) {
           for(let y=0; y<canvas.height; y++) {
-              var r = this.simplex.noise3D(x / 250, y / 250, this.t/50) * 0.4 + 0.4;
+              var r = this.simplex.noise3D(x / 20, y / 20, this.t/16) * 0.4 + 0.4;
 
               this.data[(x + y * canvas.width) * 4 + 0] = r * 255;
               this.data[(x + y * canvas.width) * 4 + 1] = r * 255;
@@ -87,8 +101,9 @@ class Blobamatronix {
     }
 
     renderFrame() {
-      //this.renderer.render( this.scene, this.camera );
       this.setNoiseMap();
+      this.texture.needsUpdate = true;
+      this.renderer.render( this.scene, this.camera );
       requestAnimationFrame(this.renderFrame);
     } 
 }
