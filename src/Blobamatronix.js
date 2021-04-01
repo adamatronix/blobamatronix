@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { octave, map } from './Utilities';
 
 class Blobamatronix {
 
@@ -9,8 +10,9 @@ class Blobamatronix {
       this.camera = null;
       this.renderer = null;
       this.renderFrame = this.renderFrame.bind(this);
-      this.setupWorld();
-      this.renderFrame();
+      this.generateTexture();
+      //this.setupWorld();
+      //this.renderFrame();
 
     }
 
@@ -51,6 +53,29 @@ class Blobamatronix {
        this.scene.add(light);
 
    }
+
+   generateTexture() {
+      this.canvas = document.getElementById('noise-canvas');
+      this.canvas.width = 400;
+      this.canvas.height = 400;
+      this.context = this.canvas.getContext('2d')
+
+      const canvas = this.canvas;
+      const c = this.context;
+
+      c.fillStyle = 'black'
+      c.fillRect(0,0,canvas.width, canvas.height)
+      for(let i=0; i<canvas.width; i++) {
+          for(let j=0; j<canvas.height; j++) {
+              let v =  octave(i/canvas.width,j/canvas.height,16)
+              const per = (100*v).toFixed(2)+'%'
+              c.fillStyle = `rgb(${per},${per},${per})`
+              c.fillRect(i,j,1,1)
+          }
+      }
+      return c.getImageData(0,0,canvas.width,canvas.height)
+
+    }
 
     renderFrame() {
       this.renderer.render( this.scene, this.camera );

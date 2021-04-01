@@ -25,6 +25,7 @@
     "webpack-obj-loader": "^1.0.4"
   },
   "dependencies": {
+    "simplex-noise": "^2.4.0",
     "three": "^0.115.0",
     "webpack-glsl-loader": "^1.0.1"
   }
