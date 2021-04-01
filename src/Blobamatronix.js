@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import dat from 'three/examples/jsm/libs/dat.gui.module';
 import SimplexNoise from 'simplex-noise';
 import { octave, map } from './Utilities';
 
@@ -11,10 +12,24 @@ class Blobamatronix {
       this.camera = null;
       this.renderer = null;
       this.renderFrame = this.renderFrame.bind(this);
+      this.setupDataGUI();
       this.generateTextureCanvas();
       this.setupWorld();
       this.addsphere();
       this.renderFrame();
+
+    }
+
+    setupDataGUI() {
+      this.controls = new function() {
+        this.speed = 16;
+        this.noiseSize = 20;
+        this.displacementScale = 5;
+      }
+      var gui = new dat.GUI();
+      gui.add(this.controls, 'speed', 0, 500);
+      gui.add(this.controls, 'noiseSize', 0, 200);
+      gui.add(this.controls, 'displacementScale', 0, 50);
 
     }
 
@@ -57,22 +72,22 @@ class Blobamatronix {
    }
 
    addsphere() {
-    const geometry = new THREE.SphereGeometry( 5, 50, 50);
-    const material = new THREE.MeshPhongMaterial({
-      flatShading: false,
+    this.geometry = new THREE.SphereGeometry( 5, 200, 200);
+    this.material = new THREE.MeshPhongMaterial({
+      flatShading: true,
       shininess: 150,
       displacementMap: this.texture,
-      displacementScale: 5
+      displacementScale: this.controls.displacementScale
     });
-    const sphere = new THREE.Mesh( geometry, material );
+    const sphere = new THREE.Mesh( this.geometry, this.material );
     this.scene.add( sphere );
    }
 
    generateTextureCanvas() {
       //this.canvas = document.getElementById('noise-canvas');
       this.canvas = document.createElement('canvas');
-      this.canvas.width = 250;
-      this.canvas.height = 250;
+      this.canvas.width = 128;
+      this.canvas.height = 128;
       this.context = this.canvas.getContext('2d');
       this.simplex = new SimplexNoise(4);
       this.t = 0;
@@ -88,7 +103,7 @@ class Blobamatronix {
 
       for(let x=0; x<canvas.width; x++) {
           for(let y=0; y<canvas.height; y++) {
-              var r = this.simplex.noise3D(x / 20, y / 20, this.t/16) * 0.4 + 0.4;
+              var r = this.simplex.noise3D(x / this.controls.noiseSize, y / this.controls.noiseSize, this.t/this.controls.speed) * 0.4 + 0.4;
 
               this.data[(x + y * canvas.width) * 4 + 0] = r * 255;
               this.data[(x + y * canvas.width) * 4 + 1] = r * 255;
@@ -103,6 +118,7 @@ class Blobamatronix {
     renderFrame() {
       this.setNoiseMap();
       this.texture.needsUpdate = true;
+      this.material.displacementScale = this.controls.displacementScale;
       this.renderer.render( this.scene, this.camera );
       requestAnimationFrame(this.renderFrame);
     } 
