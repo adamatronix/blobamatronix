@@ -3,10 +3,10 @@ const path = require('path')
 module.exports = {
   entry: './src/index.js',
   output: {
-    filename: 'my.module.js',
+    filename: 'blobamatronix.js',
     path: path.resolve(__dirname, 'lib'),
     libraryTarget: 'var',
-    library: 'MyModule'
+    library: 'Blobamatronix'
   },
   node: {
     fs: 'empty'

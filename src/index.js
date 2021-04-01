@@ -1,7 +1,3 @@
-// Add all your modules here to be exported
+import Blobamatronix from './Blobamatronix';
 
-/*
-import Example from './Example';
-
-export default Example;
-*/
+export default Blobamatronix;
