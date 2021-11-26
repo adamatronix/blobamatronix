@@ -1,3 +1,3 @@
 import Blobamatronix from './Blobamatronix';
 
-export default Blobamatronix;
+new Blobamatronix();

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
-import dat from 'three/examples/jsm/libs/dat.gui.module';
+import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 import SimplexNoise from 'simplex-noise';
 import studioHDR from './assets/studio_small_09_1k.hdr';
 import { octave, map } from './Utilities';
@@ -35,7 +35,7 @@ class Blobamatronix {
         this.clearcoatRoughness = 0;
         
       }
-      var gui = new dat.GUI();
+      var gui = new GUI();
       gui.add(this.controls, 'speed', 0, 1);
       gui.add(this.controls, 'noiseSize', 0, 0.1);
       gui.add(this.controls, 'displacementScale', 0, 50);
