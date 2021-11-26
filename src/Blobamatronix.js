@@ -22,13 +22,13 @@ class Blobamatronix {
 
     setupDataGUI() {
       this.controls = new function() {
-        this.speed = 16;
-        this.noiseSize = 20;
-        this.displacementScale = 5;
+        this.speed = 0.106;
+        this.noiseSize = 0.045;
+        this.displacementScale = 1.5;
       }
       var gui = new dat.GUI();
-      gui.add(this.controls, 'speed', 0, 500);
-      gui.add(this.controls, 'noiseSize', 0, 200);
+      gui.add(this.controls, 'speed', 0, 1);
+      gui.add(this.controls, 'noiseSize', 0, 0.1);
       gui.add(this.controls, 'displacementScale', 0, 50);
 
     }
@@ -36,7 +36,7 @@ class Blobamatronix {
     setupWorld() {
       //setup the scene
       this.scene = new THREE.Scene();
-      this.scene.background = new THREE.Color(0xcccccc);
+      this.scene.background = new THREE.Color(0xffffff);
 
       //setup world clock
       this.clock = new THREE.Clock();
@@ -62,8 +62,8 @@ class Blobamatronix {
        controls.maxDistance = 500;
 
        //add lighting
-       const skyColor = 0xB1E1FF;  // light blue
-       const groundColor = 0x000000;  // brownish orange
+       const skyColor = 0xFFFFFF;  // light blue
+       const groundColor = 0x28354D;  // brownish orange
        const intensity = 1;
        const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
        light.position.set(0,200,0);
@@ -72,10 +72,11 @@ class Blobamatronix {
    }
 
    addsphere() {
-    this.geometry = new THREE.SphereGeometry( 5, 200, 200);
+    this.geometry = new THREE.SphereGeometry( 5, 600, 600);
     this.material = new THREE.MeshPhongMaterial({
       flatShading: true,
       shininess: 150,
+      color: 0xFFFFFF,
       displacementMap: this.texture,
       displacementScale: this.controls.displacementScale
     });
@@ -100,10 +101,11 @@ class Blobamatronix {
     setNoiseMap() {
       const canvas = this.canvas;
       const c = this.context;
+      const scl = this.controls.speed;
 
       for(let x=0; x<canvas.width; x++) {
           for(let y=0; y<canvas.height; y++) {
-              var r = this.simplex.noise3D(x / this.controls.noiseSize, y / this.controls.noiseSize, this.t/this.controls.speed) * 0.4 + 0.4;
+              var r = this.noise(x * this.controls.noiseSize, y * this.controls.noiseSize, this.t, canvas.width * this.controls.noiseSize, canvas.height * this.controls.noiseSize) * 0.4 + 0.4;
 
               this.data[(x + y * canvas.width) * 4 + 0] = r * 255;
               this.data[(x + y * canvas.width) * 4 + 1] = r * 255;
@@ -111,8 +113,17 @@ class Blobamatronix {
               this.data[(x + y * canvas.width) * 4 + 3] = 255;
           }
       }
-      this.t++;
+      this.t += scl;
       c.putImageData(this.imagedata, 0, 0);
+    }
+
+    noise(x, y, z, w, h) {
+      return (
+        this.simplex.noise3D(x, y, z) * (w - x) * (h - y) +
+        this.simplex.noise3D(x - w, y, z) * x * (h - y) +
+        this.simplex.noise3D(x - w, y - h, z) * x * y +
+        this.simplex.noise3D(x, y - h, z) * (w - x) * y
+      ) / (w * h);
     }
 
     renderFrame() {
