@@ -6,7 +6,8 @@
   "scripts": {
     "develop": "webpack --mode development --config webpack.common.js",
     "start": "webpack-dev-server --open --config webpack.dev.js",
-    "build": "GENERATE_SOURCEMAP=false webpack --config webpack.prod.js"
+    "build": "GENERATE_SOURCEMAP=false webpack --config webpack.prod.js",
+    "deploy": "gh-pages -d lib"
   },
   "keywords": [],
   "author": "",
@@ -26,6 +27,8 @@
   },
   "dependencies": {
     "file-loader": "^6.2.0",
+    "gh-pages": "^3.2.3",
+    "html-webpack-plugin": "^4.5.2",
     "simplex-noise": "^2.4.0",
     "three": "^0.135.0",
     "webpack-glsl-loader": "^1.0.1"
