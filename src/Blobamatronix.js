@@ -1,7 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 import dat from 'three/examples/jsm/libs/dat.gui.module';
 import SimplexNoise from 'simplex-noise';
+import studioHDR from './assets/studio_small_09_1k.hdr';
 import { octave, map } from './Utilities';
 
 class Blobamatronix {
@@ -25,18 +27,48 @@ class Blobamatronix {
         this.speed = 0.106;
         this.noiseSize = 0.045;
         this.displacementScale = 1.5;
+        this.transmission = 1;
+        this.thickness = 1;
+        this.roughness = 0.6;
+        this.envMapIntensity = 1.2;
+        this.clearcoat = 1;
+        this.clearcoatRoughness = 0;
+        
       }
       var gui = new dat.GUI();
       gui.add(this.controls, 'speed', 0, 1);
       gui.add(this.controls, 'noiseSize', 0, 0.1);
       gui.add(this.controls, 'displacementScale', 0, 50);
+      gui.add(this.controls, 'transmission', 0, 1, 0.01).onChange((val) => {
+        this.material.transmission = val;
+      });
+
+      gui.add(this.controls, 'thickness', 0, 1, 0.1).onChange((val) => {
+        this.material.thickness = val;
+      });
+
+      gui.add(this.controls, 'roughness', 0, 1, 0.1).onChange((val) => {
+        this.material.roughness = val;
+      });
+
+      gui.add(this.controls, "envMapIntensity", 0, 3, 0.1).onChange((val) => {
+        this.material.envMapIntensity = val;
+      });
+
+      gui.add(this.controls, "clearcoat", 0, 1, 0.01).onChange((val) => {
+        this.material.clearcoat = val;
+      });
+    
+      gui.add(this.controls, "clearcoatRoughness", 0, 1, 0.01).onChange((val) => {
+        this.material.clearcoatRoughness = val;
+      });
 
     }
 
     setupWorld() {
       //setup the scene
       this.scene = new THREE.Scene();
-      this.scene.background = new THREE.Color(0xffffff);
+      this.scene.background = new THREE.Color(0xcccccc);
 
       //setup world clock
       this.clock = new THREE.Clock();
@@ -63,7 +95,7 @@ class Blobamatronix {
 
        //add lighting
        const skyColor = 0xFFFFFF;  // light blue
-       const groundColor = 0x28354D;  // brownish orange
+       const groundColor = 0xFFFFFF;  // brownish orange
        const intensity = 1;
        const light = new THREE.HemisphereLight(skyColor, groundColor, intensity);
        light.position.set(0,200,0);
@@ -73,10 +105,30 @@ class Blobamatronix {
 
    addsphere() {
     this.geometry = new THREE.SphereGeometry( 5, 600, 600);
+
+    const hdrEquirect = new RGBELoader().load(
+      studioHDR,
+      () => {
+        hdrEquirect.mapping = THREE.EquirectangularReflectionMapping;
+      }
+    );
+      /*
     this.material = new THREE.MeshPhongMaterial({
       flatShading: true,
       shininess: 150,
       color: 0xFFFFFF,
+      displacementMap: this.texture,
+      displacementScale: this.controls.displacementScale
+    });*/
+
+    this.material = new THREE.MeshPhysicalMaterial({
+      transmission: this.controls.transmission,
+      thickness: this.controls.thickness,
+      roughness: this.controls.roughness,
+      envMap: hdrEquirect,
+      envMapIntensity: this.controls.envMapIntensity,
+      clearcoat: this.controls.clearcoat,
+      clearcoatRoughness: this.controls.clearcoatRoughness,
       displacementMap: this.texture,
       displacementScale: this.controls.displacementScale
     });
